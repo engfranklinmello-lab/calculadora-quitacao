@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Calculadora de Quitação J.Lemara</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card: #111827;
+      --border: #1f2937;
+      --text: #e5e7eb;
+      --text-soft: #9ca3af;
+      --accent: #22c55e;
+      --accent-glow: rgba(34, 197, 94, 0.35);
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 32px 16px;
+      background: radial-gradient(circle at top left, #0f172a, #020617 60%);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 980px;
+      background: linear-gradient(160deg, #111827, #020617);
+      border-radius: 22px;
+      padding: 24px 24px 30px;
+      border: 1px solid rgba(148, 163, 184, 0.32);
+      box-shadow:
+        0 22px 45px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(14px);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      margin: 0 0 6px;
+      font-size: 1.6rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      text-shadow: 0 0 14px var(--accent-glow);
+    }
+
+    .header p {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--text-soft);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.8fr);
+      gap: 18px;
+    }
+
+    @media (max-width: 860px) {
+      .container {
+        padding: 20px 16px 24px;
+      }
+      .grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, #020617, #020617 55%);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 16px 16px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top left, var(--accent-glow), transparent 55%);
+      opacity: 0.25;
+      pointer-events: none;
+    }
+
+    .card-header {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #e5e7eb;
+      margin-bottom: 4px;
+    }
+
+    .card-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-soft);
+    }
+
+    .form-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 700px) {
+      .form-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field label {
+      font-size: 0.78rem;
+      color: var(--text-soft);
+    }
+
+    .field input {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      background: #020617;
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .field input::placeholder {
+      color: #6b7280;
+      font-size: 0.85rem;
+    }
+
+    .field input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent-glow);
+    }
+
+    .field small {
+      font-size: 0.7rem;
+      color: var(--text-soft);
+    }
+
+    .btn-row {
+      position: relative;
+      z-index: 1;
+      margin-top: 14px;
+    }
+
+    button {
+      border-radius: 999px;
+      border: none;
+      padding: 10px 18px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      letter-spacing: 0.03em;
+      transition:
+        transform 0.08s ease,
+        box-shadow 0.14s ease,
+        background 0.14s ease,
+        opacity 0.14s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #022c22;
+      box-shadow:
+        0 12px 24px rgba(34, 197, 94, 0.35),
+        0 0 0 1px rgba(5, 46, 22, 0.9);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        0 14px 30px rgba(34, 197, 94, 0.55),
+        0 0 0 1px rgba(4, 120, 87, 0.9);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow:
+        0 8px 18px rgba(34, 197, 94, 0.35),
+        0 0 0 1px rgba(4, 120, 87, 1);
+    }
+
+    .error {
+      margin-top: 10px;
+      font-size: 0.76rem;
+      color: var(--danger);
+      background: rgba(127, 29, 29, 0.25);
+      border-radius: 8px;
+      padding: 6px 8px;
+      border: 1px solid rgba(248, 113, 113, 0.4);
+    }
+
+    .results {
+      position: relative;
+      z-index: 1;
+    }
+
+    .summary {
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.9);
+      padding: 10px 11px;
+      font-size: 0.82rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .summary-label {
+      color: var(--text-soft);
+    }
+
+    .summary-value {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .summary-small {
+      font-size: 0.76rem;
+      color: #9ca3af;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .cards-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .scenario-card {
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #020617;
+      padding: 10px 10px 11px;
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .scenario-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 4px;
+    }
+
+    .scenario-name {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #e5e7eb;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .scenario-rate {
+      font-size: 0.72rem;
+      color: var(--text-soft);
+    }
+
+    .scenario-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .scenario-label {
+      color: var(--text-soft);
+    }
+
+    .scenario-value {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .scenario-discount {
+      border-top: 1px solid #1f2937;
+      margin-top: 4px;
+      padding-top: 4px;
+    }
+
+    .scenario-best {
+      border-color: rgba(34, 197, 94, 0.8);
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.6), 0 0 20px rgba(16, 185, 129, 0.4);
+      background: radial-gradient(circle at top left, rgba(16, 185, 129, 0.12), #020617 65%);
+    }
+
+    .scenario-best-note {
+      margin-top: 3px;
+      font-size: 0.72rem;
+      color: #4ade80;
+    }
+
+    .btn-copy {
+      width: 100%;
+      margin-top: 8px;
+      background: #020617;
+      color: var(--text-soft);
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      box-shadow: 0 0 14px rgba(15, 23, 42, 0.9);
+      font-size: 0.85rem;
+    }
+
+    .btn-copy:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .btn-copy:active {
+      transform: translateY(0);
+    }
+
+    .results-card {
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Calculadora de Quitação J.Lemara</h1>
+      <p>
+        Simulação de quitação com taxas mensais de 0,5%, 0,8% e 1,0%, somando o valor em atraso à proposta final.
+      </p>
+    </div>
+
+    <div class="grid">
+      <!-- FORMULÁRIO -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Dados do contrato</div>
+          <div class="card-subtitle">
+            Informe o total de parcelas, o valor da parcela e o valor em atraso.
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="parcelas">Número de parcelas</label>
+            <input
+              type="number"
+              id="parcelas"
+              placeholder="Ex.: 139"
+              min="1"
+            />
+            <small>Total de parcelas do financiamento.</small>
+          </div>
+
+          <div class="field">
+            <label for="valorParcela">Valor da parcela (R$)</label>
+            <input
+              type="text"
+              id="valorParcela"
+              placeholder="Ex.: 884,09"
+            />
+            <small>Valor cheio da parcela, sem desconto.</small>
+          </div>
+
+          <div class="field">
+            <label for="valorAtraso">Valor em atraso (R$)</label>
+            <input
+              type="text"
+              id="valorAtraso"
+              placeholder="Ex.: 1.200,00"
+            />
+            <small>Somatório das parcelas vencidas.</small>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-primary" type="button" id="btnCalcular">
+            <span>Calcular quitação (0,5% · 0,8% · 1,0%)</span>
+          </button>
+        </div>
+
+        <div id="erro" class="error" style="display:none;"></div>
+      </div>
+
+      <!-- RESULTADOS -->
+      <div class="card results-card" id="resultadoCard" style="display:none;">
+        <div class="card-header">
+          <div class="card-title">Resultados da simulação</div>
+          <div class="card-subtitle">
+            Comparativo de propostas finais e descontos por taxa de juros.
+          </div>
+        </div>
+
+        <div class="results">
+          <div class="summary" id="summaryBox">
+            <div class="summary-row">
+              <span class="summary-label">
+                Total sem desconto (contrato + atraso):
+              </span>
+              <span class="summary-value" id="totalSemDesconto">
+                R$ 0,00
+              </span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Valor em atraso considerado:</span>
+              <span class="summary-value" id="valorAtrasoInfo">
+                R$ 0,00
+              </span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Melhor cenário para o cliente:</span>
+              <span class="summary-value" id="melhorCenario">
+                -
+              </span>
+            </div>
+            <div class="summary-small" id="melhorResumo"></div>
+          </div>
+
+          <div class="cards-grid" id="cardsGrid">
+            <!-- cards dos cenários serão preenchidos via JS -->
+          </div>
+
+          <button type="button" class="btn-copy" id="btnCopiar">
+            Copiar valores de todos os cenários
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const cenariosConfig = [
+      { id: "0.5", label: "Taxa 0,5%", taxaJuros: 0.005 },
+      { id: "0.8", label: "Taxa 0,8%", taxaJuros: 0.008 },
+      { id: "1.0", label: "Taxa 1,0%", taxaJuros: 0.01 },
+    ];
+
+    function parseValorBR(str) {
+      if (!str) return 0;
+      str = String(str).trim();
+      str = str.replace(/\./g, "").replace(",", ".");
+      var n = Number(str);
+      return isNaN(n) ? 0 : n;
+    }
+
+    function formatBRL(valor) {
+      return valor.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 2,
+      });
+    }
+
+    function calcularPV(taxa, numeroParcelas, valorParcela) {
+      if (!taxa || taxa <= 0) {
+        return numeroParcelas * valorParcela;
+      }
+      var fator = (1 - Math.pow(1 + taxa, -numeroParcelas)) / taxa;
+      return valorParcela * fator;
+    }
+
+    function calcularCenarios(numeroParcelas, valorParcela, valorAtraso) {
+      var totalContratual = numeroParcelas * valorParcela;
+      var totalSemDesconto = totalContratual + valorAtraso;
+
+      var cenarios = cenariosConfig.map(function (c) {
+        var quitacaoSemAtraso = calcularPV(
+          c.taxaJuros,
+          numeroParcelas,
+          valorParcela
+        );
+        var propostaFinal = quitacaoSemAtraso + valorAtraso;
+        var descontoAbsoluto = totalSemDesconto - propostaFinal;
+        var descontoPercentual =
+          totalSemDesconto > 0 ? descontoAbsoluto / totalSemDesconto : 0;
+
+        return {
+          id: c.id,
+          label: c.label,
+          taxaJuros: c.taxaJuros,
+          quitacaoSemAtraso: quitacaoSemAtraso,
+          valorAtraso: valorAtraso,
+          propostaFinal: propostaFinal,
+          descontoAbsoluto: descontoAbsoluto,
+          descontoPercentual: descontoPercentual,
+        };
+      });
+
+      var melhor = null;
+      cenarios.forEach(function (c) {
+        if (!melhor || c.descontoAbsoluto > melhor.descontoAbsoluto) {
+          melhor = c;
+        }
+      });
+
+      return {
+        totalSemDesconto: totalSemDesconto,
+        valorAtraso: valorAtraso,
+        cenarios: cenarios,
+        melhor: melhor,
+      };
+    }
+
+    var btnCalcular = document.getElementById("btnCalcular");
+    var erroDiv = document.getElementById("erro");
+    var resultadoCard = document.getElementById("resultadoCard");
+    var totalSemDescontoSpan = document.getElementById("totalSemDesconto");
+    var valorAtrasoInfoSpan = document.getElementById("valorAtrasoInfo");
+    var melhorCenarioSpan = document.getElementById("melhorCenario");
+    var melhorResumoSpan = document.getElementById("melhorResumo");
+    var cardsGrid = document.getElementById("cardsGrid");
+    var btnCopiar = document.getElementById("btnCopiar");
+
+    var ultimoResultadoTexto = "";
+
+    btnCalcular.addEventListener("click", function () {
+      erroDiv.style.display = "none";
+      erroDiv.textContent = "";
+
+      var parcelas = Number(document.getElementById("parcelas").value);
+      var valorParcela = parseValorBR(
+        document.getElementById("valorParcela").value
+      );
+      var valorAtraso = parseValorBR(
+        document.getElementById("valorAtraso").value
+      );
+
+      if (!parcelas || parcelas <= 0) {
+        erroDiv.textContent = "Informe um número de parcelas válido.";
+        erroDiv.style.display = "block";
+        return;
+      }
+
+      if (!valorParcela || valorParcela <= 0) {
+        erroDiv.textContent =
+          "Informe o valor da parcela corretamente (ex.: 884,09).";
+        erroDiv.style.display = "block";
+        return;
+      }
+
+      var resultado = calcularCenarios(parcelas, valorParcela, valorAtraso);
+
+      // Atualiza resumo
+      totalSemDescontoSpan.textContent = formatBRL(
+        resultado.totalSemDesconto
+      );
+      valorAtrasoInfoSpan.textContent = formatBRL(resultado.valorAtraso);
+
+      if (resultado.melhor) {
+        var melhorTaxa = (resultado.melhor.taxaJuros * 100)
+          .toFixed(2)
+          .replace(".", ",");
+        var melhorDescPct = (
+          resultado.melhor.descontoPercentual * 100
+        )
+          .toFixed(2)
+          .replace(".", ",");
+
+        melhorCenarioSpan.textContent = resultado.melhor.label;
+        melhorResumoSpan.textContent =
+          "Desconto de " +
+          formatBRL(resultado.melhor.descontoAbsoluto) +
+          " (" +
+          melhorDescPct +
+          "%) em relação ao total sem desconto.";
+      } else {
+        melhorCenarioSpan.textContent = "-";
+        melhorResumoSpan.textContent = "";
+      }
+
+      // Monta cards
+      cardsGrid.innerHTML = "";
+      resultado.cenarios.forEach(function (c) {
+        var isBest =
+          resultado.melhor &&
+          c.id === resultado.melhor.id &&
+          c.descontoAbsoluto > 0;
+
+        var card = document.createElement("div");
+        card.className = "scenario-card" + (isBest ? " scenario-best" : "");
+
+        var header = document.createElement("div");
+        header.className = "scenario-header";
+
+        var name = document.createElement("span");
+        name.className = "scenario-name";
+        name.textContent = c.label;
+
+        var rate = document.createElement("span");
+        rate.className = "scenario-rate";
+        rate.textContent =
+          (c.taxaJuros * 100).toFixed(2).replace(".", ",") + "% ao mês";
+
+        header.appendChild(name);
+        header.appendChild(rate);
+
+        var rowQuit = document.createElement("div");
+        rowQuit.className = "scenario-row";
+        rowQuit.innerHTML =
+          '<span class="scenario-label">Quitação (sem atraso):</span>' +
+          '<span class="scenario-value">' +
+          formatBRL(c.quitacaoSemAtraso) +
+          "</span>";
+
+        var rowAtraso = document.createElement("div");
+        rowAtraso.className = "scenario-row";
+        rowAtraso.innerHTML =
+          '<span class="scenario-label">Atraso:</span>' +
+          '<span class="scenario-value">' +
+          formatBRL(c.valorAtraso) +
+          "</span>";
+
+        var rowProp = document.createElement("div");
+        rowProp.className = "scenario-row";
+        rowProp.innerHTML =
+          '<span class="scenario-label">Proposta final:</span>' +
+          '<span class="scenario-value">' +
+          formatBRL(c.propostaFinal) +
+          "</span>";
+
+        var rowDesc = document.createElement("div");
+        rowDesc.className = "scenario-row scenario-discount";
+        rowDesc.innerHTML =
+          '<span class="scenario-label">Desconto:</span>' +
+          '<span class="scenario-value">' +
+          formatBRL(c.descontoAbsoluto) +
+          " (" +
+          (c.descontoPercentual * 100).toFixed(2).replace(".", ",") +
+          "%)</span>";
+
+        card.appendChild(header);
+        card.appendChild(rowQuit);
+        card.appendChild(rowAtraso);
+        card.appendChild(rowProp);
+        card.appendChild(rowDesc);
+
+        if (isBest) {
+          var note = document.createElement("div");
+          note.className = "scenario-best-note";
+          note.textContent =
+            "Melhor custo-benefício para o cliente nesse cenário.";
+          card.appendChild(note);
+        }
+
+        cardsGrid.appendChild(card);
+      });
+
+      // Monta texto para copiar
+      var linhasCenarios = resultado.cenarios
+        .map(function (c) {
+          var taxaPct = (c.taxaJuros * 100)
+            .toFixed(2)
+            .replace(".", ",");
+          var descPct = (c.descontoPercentual * 100)
+            .toFixed(2)
+            .replace(".", ",");
+
+          return (
+            c.label +
+            " (" +
+            taxaPct +
+            "% ao mês)\n" +
+            "Quitação (sem atraso): " +
+            formatBRL(c.quitacaoSemAtraso) +
+            "\n" +
+            "Valor em atraso: " +
+            formatBRL(c.valorAtraso) +
+            "\n" +
+            "Proposta final (quit + atraso): " +
+            formatBRL(c.propostaFinal) +
+            "\n" +
+            "Desconto: " +
+            formatBRL(c.descontoAbsoluto) +
+            " (" +
+            descPct +
+            "%)"
+          );
+        })
+        .join("\n\n");
+
+      var texto =
+        "Simulação de Quitação J.Lemara\n\n" +
+        "Número de parcelas: " +
+        parcelas +
+        "\n" +
+        "Valor da parcela: " +
+        formatBRL(valorParcela) +
+        "\n" +
+        "Valor em atraso: " +
+        formatBRL(valorAtraso) +
+        "\n\n" +
+        "Total sem desconto (contrato + atraso): " +
+        formatBRL(resultado.totalSemDesconto) +
+        "\n\n" +
+        "Cenários:\n" +
+        linhasCenarios +
+        "\n\n" +
+        "Melhor cenário: " +
+        (resultado.melhor ? resultado.melhor.label : "não identificado");
+
+      ultimoResultadoTexto = texto;
+
+      // Mostrar card de resultado com animação
+      resultadoCard.style.display = "block";
+      resultadoCard.style.animation = "none";
+      void resultadoCard.offsetWidth;
+      resultadoCard.style.animation = "fadeIn 0.4s ease-in-out";
+    });
+
+    btnCopiar.addEventListener("click", async function () {
+      if (!ultimoResultadoTexto) {
+        erroDiv.textContent =
+          "Faça uma simulação antes de copiar os valores.";
+        erroDiv.style.display = "block";
+        return;
+      }
+
+      erroDiv.style.display = "none";
+      erroDiv.textContent = "";
+
+      try {
+        await navigator.clipboard.writeText(ultimoResultadoTexto);
+        alert("Valores copiados para a área de transferência.");
+      } catch (e) {
+        console.error(e);
+        erroDiv.textContent =
+          "Não foi possível copiar automaticamente. Tente copiar manualmente.";
+        erroDiv.style.display = "block";
+      }
+    });
+  </script>
+</body>
+</html>
